@@ -2,7 +2,9 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 #define LIMIT 10000000
 /*
 This function checks if an integer n is prime.
@@ -30,25 +32,37 @@ int main() {
 		std::cout << "too big, try again" <<std::endl;
 	}
 	} while (innerlimit > LIMIT);
-	std::cout << "Enter number of Threads: " <<std::endl;
-	cin >> nthread;
-	float increase = 1;
+	do{
+		std::cout << "Enter number of Threads: " <<std::endl;
+		cin >> nthread;
+		if (nthread < 1)
+		{
+			std::cout << "Threads cannot be less than 1 " <<std::endl;
+		}
+	} while (nthread < 1);
+	
+	auto start = high_resolution_clock::now();
+	
+	float cthread = 1;
 	float increasestart = 2;
 	float increaseend = innerlimit/nthread;
-	for (std::size_t i = 0; i < nthread; i++) {
-	std::cout << "thread " << i << " start " << increasestart << " end " << increaseend <<std::endl;
-	increase++;
+	
+	for (int i = 0; i < nthread; i++) {
+	//std::cout << "thread " << i << " start " << increasestart << " end " << increaseend <<std::endl;
+	cthread++;
     threads.emplace_back(getPrimes, increasestart, increaseend);
     increasestart = increaseend+1;
-    increaseend = innerlimit*((increase)/nthread);
-    
+    increaseend = innerlimit*(cthread/nthread);
 	}
 	for (auto& thread : threads) {
     thread.join();
 	}
-  std::cout << primes.size() << " primes were found." << std::endl;
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start);
+    cout << duration.count() << endl;
+  	std::cout << primes.size() << " primes were found." << std::endl;
 
-  return 0;
+  	return 0;
 }
 
 void getPrimes (int start, int end)
