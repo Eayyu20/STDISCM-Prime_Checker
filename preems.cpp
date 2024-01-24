@@ -3,7 +3,7 @@
 #include <thread>
 #include <mutex>
 using namespace std;
-#define LIMIT 10000
+#define LIMIT 10000000
 /*
 This function checks if an integer n is prime.
 
@@ -15,17 +15,39 @@ Returns true if n is prime, and false otherwise.
 bool check_prime(const int &n);
 void getPrimes (int start, int end);
 int count;
+int innerlimit = LIMIT;
+int nthread;
 mutex primelock;
+std::vector<int> primes;
 
 int main() {
-  std::cout << LIMIT/2 <<std::endl;
-  std::cout << LIMIT/2+1<<std::endl;
-  std::cout << LIMIT<<std::endl;
-  std:: thread t1 (getPrimes, 2,(LIMIT/2));
-  std:: thread t2 (getPrimes, (LIMIT/2)+1,LIMIT);
-  t1.join();
-  t2.join();
-  std::cout << count << " primes were found." << std::endl;
+	std::vector<std::thread> threads;
+	do {
+	std::cout << "Enter N: " <<std::endl;
+	cin >> innerlimit;
+	if (innerlimit > LIMIT)
+	{
+		std::cout << "too big, try again" <<std::endl;
+	}
+	} while (innerlimit > LIMIT);
+	std::cout << "Enter number of Threads: " <<std::endl;
+	cin >> nthread;
+	float increase = 1;
+	float increasestart = 2;
+	float increaseend = innerlimit/nthread;
+	float increaseval = 1/nthread;
+	for (std::size_t i = 0; i < nthread; i++) {
+	std::cout << "thread " << i << " start " << increasestart << " end " << increaseend <<std::endl;
+	increase++;
+    threads.emplace_back(getPrimes, increasestart, increaseend);
+    increasestart = (innerlimit*(increaseval*increase));
+    increaseend = innerlimit*((increase+1)/nthread);
+    
+	}
+	for (auto& thread : threads) {
+    thread.join();
+	}
+  std::cout << primes.size() << " primes were found." << std::endl;
 
   return 0;
 }
@@ -35,7 +57,7 @@ void getPrimes (int start, int end)
 	for (int current_num = start; current_num <= end; current_num++) {
     if (check_prime(current_num)) {
       primelock.lock();
-      count++;
+      primes.push_back(current_num);
       primelock.unlock();
     }
   }
