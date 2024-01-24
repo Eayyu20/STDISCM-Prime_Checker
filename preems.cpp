@@ -35,13 +35,12 @@ int main() {
 	float increase = 1;
 	float increasestart = 2;
 	float increaseend = innerlimit/nthread;
-	float increaseval = 1/nthread;
 	for (std::size_t i = 0; i < nthread; i++) {
 	std::cout << "thread " << i << " start " << increasestart << " end " << increaseend <<std::endl;
 	increase++;
     threads.emplace_back(getPrimes, increasestart, increaseend);
-    increasestart = (innerlimit*(increaseval*increase));
-    increaseend = innerlimit*((increase+1)/nthread);
+    increasestart = increaseend+1;
+    increaseend = innerlimit*((increase)/nthread);
     
 	}
 	for (auto& thread : threads) {
